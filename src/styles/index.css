@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .calendar-grid {
+    @apply grid gap-2 p-4;
+  }
+  
+  .calendar-cell {
+    @apply border border-gray-200 p-2 rounded min-h-[100px];
+  }
+  
+  .assistant-card {
+    @apply bg-white shadow rounded p-2 cursor-move;
+  }
+} 
