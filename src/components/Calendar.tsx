@@ -3,6 +3,8 @@ import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { Assistant, DaySchedule } from '../types'
 import { getTextColor } from '../utils/planningUtils'
+import { jsPDF } from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 interface CalendarProps {
   assistants: Assistant[]
@@ -196,6 +198,52 @@ const Calendar: React.FC<CalendarProps> = ({ assistants, schedule, onScheduleCha
     onScheduleChange(newSchedule);
   };
 
+  const exportToPDF = () => {
+    try {
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(16);
+      doc.text('Schichtplan', 14, 15);
+      
+      // Prepare table data
+      const tableData = schedule.map(day => {
+        const shiftNames = day.shift.map(a => a.name).join(', ');
+        const backupNames = day.backup.map(a => a.name).join(', ');
+        return [
+          format(new Date(day.date), 'dd.MM.yyyy', { locale: de }),
+          format(new Date(day.date), 'EEEE', { locale: de }),
+          shiftNames || '-',
+          backupNames || '-'
+        ];
+      });
+
+      // Add table
+      autoTable(doc, {
+        head: [['Datum', 'Wochentag', 'Hauptdienst', 'Bereitschaft']],
+        body: tableData,
+        startY: 25,
+        theme: 'grid',
+        styles: {
+          fontSize: 10,
+          cellPadding: 5,
+        },
+        headStyles: {
+          fillColor: [66, 139, 202],
+          textColor: 255,
+          fontSize: 11,
+          fontStyle: 'bold',
+        },
+      });
+
+      // Save the PDF
+      doc.save('schichtplan.pdf');
+    } catch (error) {
+      console.error('Fehler beim PDF-Export:', error);
+      alert('Es gab einen Fehler beim Erstellen des PDFs. Bitte versuchen Sie es erneut.');
+    }
+  };
+
   return (
     <div className="p-4">
       <TrashZone />
@@ -237,6 +285,17 @@ const Calendar: React.FC<CalendarProps> = ({ assistants, schedule, onScheduleCha
             </div>
           ))}
         </div>
+      </div>
+      <div className="mt-8 flex justify-center">
+        <button
+          onClick={exportToPDF}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200 flex items-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Als PDF speichern
+        </button>
       </div>
     </div>
   )
