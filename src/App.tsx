@@ -41,7 +41,7 @@ function App() {
     if (over.id === 'trash-zone') {
       // Only handle drops from the calendar (not from the name list)
       if (typeof active.id === 'string' && !active.id.startsWith('name-list-')) {
-        const [assistantName, sourceDate, sourceRoleStr] = active.id
+        const [, sourceDate, sourceRoleStr] = active.id
           .toString()
           .split('|')
         const sourceIndex = parseInt(sourceRoleStr.split('|')[1], 10)

@@ -76,7 +76,11 @@ export function generateScheduleSuggestions(
     return [...updatedAssistants]
       .filter(assistant => {
         const availability = assistant.availability.find(a => a.date === date)
-        return availability?.status === 'Yes'
+        // For main service (shift), only consider "Yes"
+        // For backup service, consider both "Yes" and "Under reserve"
+        return role === 'shift' 
+          ? availability?.status === 'Yes'
+          : availability?.status === 'Yes' || availability?.status === 'Under reserve'
       })
       .sort((a, b) => {
         // Berücksichtige gewünschtes Pensum
