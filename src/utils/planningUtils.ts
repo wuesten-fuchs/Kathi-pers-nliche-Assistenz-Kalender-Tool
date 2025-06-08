@@ -2,7 +2,7 @@ import { Assistant, DaySchedule, AvailabilityWarning } from '../types'
 import { getWeek } from 'date-fns'
 
 // Farbpalette für die Assistenten
-const COLORS = [
+export const COLORS = [
   '#FF6B6B', // Rot
   '#4ECDC4', // Türkis
   '#45B7D1', // Blau

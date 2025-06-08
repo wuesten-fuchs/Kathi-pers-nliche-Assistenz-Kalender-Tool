@@ -3,7 +3,7 @@ import { DndContext, DragEndEvent } from '@dnd-kit/core'
 import CSVUploader from './components/CSVUploader'
 import Calendar from './components/Calendar'
 import { Assistant, DaySchedule, AvailabilityWarning } from './types'
-import { generateScheduleSuggestions, checkAvailabilityWarnings } from './utils/planningUtils'
+import { generateScheduleSuggestions, checkAvailabilityWarnings, COLORS } from './utils/planningUtils'
 
 function App() {
   const [assistants, setAssistants] = useState<Assistant[]>([])
@@ -11,20 +11,24 @@ function App() {
   const [availabilityWarnings, setAvailabilityWarnings] = useState<AvailabilityWarning[]>([])
 
   const handleCSVUpload = (data: Assistant[]) => {
-    setAssistants(data)
+    const assistantsWithColor = data.map((assistant, index) => ({
+      ...assistant,
+      color: COLORS[index % COLORS.length]
+    }))
+    setAssistants(assistantsWithColor)
     // Initialize empty schedule based on CSV data
-    const initialSchedule = data[0]?.availability.map(day => ({
+    const initialSchedule = assistantsWithColor[0]?.availability.map(day => ({
       date: day.date,
       shift: [],
       backup: []
     })) || []
-    
+
     // Generate initial schedule suggestions
-    const suggestedSchedule = generateScheduleSuggestions(data, initialSchedule)
+    const suggestedSchedule = generateScheduleSuggestions(assistantsWithColor, initialSchedule)
     setSchedule(suggestedSchedule)
-    
+
     // Check for availability warnings
-    const warnings = checkAvailabilityWarnings(data)
+    const warnings = checkAvailabilityWarnings(assistantsWithColor)
     setAvailabilityWarnings(warnings)
   }
 
