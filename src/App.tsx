@@ -68,11 +68,11 @@ function App() {
     }
 
     // active.id format: "assistantName|date|role|index" when dragging from the calendar
-    const [assistantName, sourceDate, sourceRoleStr, sourceIndexStr] = active.id
+    const [, sourceDate, sourceRoleStr] = active.id
       .toString()
       .split('|')
-    const sourceIndex = parseInt(sourceIndexStr, 10)
-    const sourceRole = sourceRoleStr as 'shift' | 'backup'
+    const sourceIndex = parseInt(sourceRoleStr.split('|')[1], 10)
+    const sourceRole = sourceRoleStr.split('|')[0] as 'shift' | 'backup'
 
     setSchedule(currentSchedule => {
       // Deep copy to avoid mutation issues

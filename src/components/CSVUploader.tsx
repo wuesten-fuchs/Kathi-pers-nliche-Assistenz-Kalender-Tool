@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import Papa from 'papaparse'
 import { Assistant } from '../types'
+import { COLORS } from '../utils/planningUtils'
 
 interface CSVUploaderProps {
   onUpload: (data: Assistant[]) => void
@@ -17,7 +18,7 @@ const CSVUploader: React.FC<CSVUploaderProps> = ({ onUpload }) => {
         const headers = data[0]
         
         // Skip header row and process data
-        const assistants: Assistant[] = data.slice(1).map(row => {
+        const assistants: Assistant[] = data.slice(1).map((row, index) => {
           const name = row[0]
           const availability = headers.slice(1, -1).map((date, index) => ({
             date,
@@ -26,7 +27,10 @@ const CSVUploader: React.FC<CSVUploaderProps> = ({ onUpload }) => {
 
           return {
             name,
-            availability
+            availability,
+            color: COLORS[index % COLORS.length],
+            assignedShifts: 0,
+            assignedBackups: 0
           }
         })
 
