@@ -34,44 +34,70 @@ function App() {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
-    
-    if (!over) return;
-    
-    // active.id format: "assistantName|date|role|index"
-    const [assistantName, sourceDate, sourceRoleStr, sourceIndexStr] = active.id.toString().split('|');
-    const sourceIndex = parseInt(sourceIndexStr, 10);
-    const sourceRole = sourceRoleStr as 'shift' | 'backup';
+
+    if (!over) return
 
     // over.id format: "date-role"
-    const overId = over.id.toString();
-    const parts = overId.split('-');
-    const targetRole = parts.pop() as 'shift' | 'backup';
-    const targetDate = parts.join('-');
+    const overId = over.id.toString()
+    const overParts = overId.split('-')
+    const targetRole = overParts.pop() as 'shift' | 'backup'
+    const targetDate = overParts.join('-')
+
+    // Dragged from the name list
+    if (typeof active.id === 'string' && active.id.startsWith('name-list-')) {
+      const assistantName = active.id.replace('name-list-', '')
+
+      setSchedule(currentSchedule => {
+        const newSchedule = JSON.parse(JSON.stringify(currentSchedule))
+        const targetDay = newSchedule.find((d: DaySchedule) => d.date === targetDate)
+        if (!targetDay) return currentSchedule
+
+        const assistant = assistants.find(a => a.name === assistantName)
+        if (!assistant) return currentSchedule
+
+        const targetList = targetDay[targetRole]
+        // Avoid duplicates
+        if (!targetList.find((a: Assistant) => a.name === assistant.name)) {
+          targetList.push(assistant)
+        }
+
+        return newSchedule
+      })
+
+      return
+    }
+
+    // active.id format: "assistantName|date|role|index" when dragging from the calendar
+    const [assistantName, sourceDate, sourceRoleStr, sourceIndexStr] = active.id
+      .toString()
+      .split('|')
+    const sourceIndex = parseInt(sourceIndexStr, 10)
+    const sourceRole = sourceRoleStr as 'shift' | 'backup'
 
     setSchedule(currentSchedule => {
       // Deep copy to avoid mutation issues
-      const newSchedule = JSON.parse(JSON.stringify(currentSchedule));
+      const newSchedule = JSON.parse(JSON.stringify(currentSchedule))
 
-      const sourceDay = newSchedule.find((d: DaySchedule) => d.date === sourceDate);
-      const targetDay = newSchedule.find((d: DaySchedule) => d.date === targetDate);
+      const sourceDay = newSchedule.find((d: DaySchedule) => d.date === sourceDate)
+      const targetDay = newSchedule.find((d: DaySchedule) => d.date === targetDate)
 
       if (!sourceDay || !targetDay) {
-        return currentSchedule; // Should not happen
+        return currentSchedule // Should not happen
       }
-      
+
       // Remove from source and keep the moved assistant with all its data
-      const sourceList = sourceDay[sourceRole];
-      const [movedAssistant] = sourceList.splice(sourceIndex, 1);
+      const sourceList = sourceDay[sourceRole]
+      const [movedAssistant] = sourceList.splice(sourceIndex, 1)
       if (!movedAssistant) {
-        return currentSchedule;
+        return currentSchedule
       }
 
       // Add to target
-      const targetList = targetDay[targetRole];
-      targetList.push(movedAssistant);
-      
-      return newSchedule;
-    });
+      const targetList = targetDay[targetRole]
+      targetList.push(movedAssistant)
+
+      return newSchedule
+    })
   }
 
   return (
