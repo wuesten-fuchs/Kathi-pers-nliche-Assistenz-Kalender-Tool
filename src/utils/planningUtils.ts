@@ -1,19 +1,36 @@
 import { Assistant, DaySchedule, AvailabilityWarning } from '../types'
 import { getWeek } from 'date-fns'
 
-// Farbpalette für die Assistenten
+// Farbpalette für die Assistenten - WCAG AAA compliant
 export const COLORS = [
-  '#FF6B6B', // Rot
-  '#4ECDC4', // Türkis
-  '#45B7D1', // Blau
-  '#96CEB4', // Mint
-  '#FFEEAD', // Gelb
-  '#D4A5A5', // Rosa
-  '#9B59B6', // Lila
-  '#3498DB', // Hellblau
-  '#E67E22', // Orange
-  '#2ECC71', // Grün
+  '#0056b3', // Dunkelblau
+  '#006400', // Dunkelgrün
+  '#8B0000', // Dunkelrot
+  '#4B0082', // Indigo
+  '#800080', // Lila
+  '#006666', // Dunkeltürkis
+  '#663300', // Dunkelbraun
+  '#8B4513', // Sattelbraun
+  '#2F4F4F', // Dunkelschiefergrau
+  '#4B0082', // Indigo
+  '#800000', // Dunkelrot
+  '#006400', // Dunkelgrün
 ]
+
+// Function to determine if text should be light or dark based on background color
+export function getTextColor(backgroundColor: string): string {
+  // Convert hex to RGB
+  const hex = backgroundColor.replace('#', '')
+  const r = parseInt(hex.substr(0, 2), 16)
+  const g = parseInt(hex.substr(2, 2), 16)
+  const b = parseInt(hex.substr(4, 2), 16)
+  
+  // Calculate relative luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  
+  // Return white for dark backgrounds, black for light backgrounds
+  return luminance < 0.5 ? '#FFFFFF' : '#000000'
+}
 
 // Extrahiere gewünschtes Pensum aus dem Namen
 export function extractDesiredShifts(name: string): string | undefined {

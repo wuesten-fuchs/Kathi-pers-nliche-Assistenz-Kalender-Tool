@@ -37,6 +37,32 @@ function App() {
 
     if (!over) return
 
+    // Handle dropping in trash zone
+    if (over.id === 'trash-zone') {
+      // Only handle drops from the calendar (not from the name list)
+      if (typeof active.id === 'string' && !active.id.startsWith('name-list-')) {
+        const [assistantName, sourceDate, sourceRoleStr] = active.id
+          .toString()
+          .split('|')
+        const sourceIndex = parseInt(sourceRoleStr.split('|')[1], 10)
+        const sourceRole = sourceRoleStr.split('|')[0] as 'shift' | 'backup'
+
+        setSchedule(currentSchedule => {
+          const newSchedule = JSON.parse(JSON.stringify(currentSchedule))
+          const sourceDay = newSchedule.find((d: DaySchedule) => d.date === sourceDate)
+          
+          if (!sourceDay) return currentSchedule
+
+          // Remove the assistant from the source position
+          const sourceList = sourceDay[sourceRole]
+          sourceList.splice(sourceIndex, 1)
+
+          return newSchedule
+        })
+      }
+      return
+    }
+
     // over.id format: "date-role"
     const overId = over.id.toString()
     const overParts = overId.split('-')
@@ -115,11 +141,11 @@ function App() {
           <CSVUploader onUpload={handleCSVUpload} />
           
           {availabilityWarnings.length > 0 && (
-            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-              <h2 className="text-lg font-medium text-yellow-800 mb-2">Verfügbarkeitswarnungen</h2>
+            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-700 rounded-md">
+              <h2 className="text-lg font-medium text-yellow-900 mb-2">Verfügbarkeitswarnungen</h2>
               <ul className="list-disc pl-5">
                 {availabilityWarnings.map((warning, index) => (
-                  <li key={index} className="text-yellow-700">
+                  <li key={index} className="text-yellow-800">
                     {warning.assistant.name} ist in KW {warning.weekNumber} nur an {warning.availableDays} Tagen verfügbar
                   </li>
                 ))}
