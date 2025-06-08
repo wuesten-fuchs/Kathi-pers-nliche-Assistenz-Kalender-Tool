@@ -44,9 +44,6 @@ function App() {
     const targetRole = parts.pop() as 'shift' | 'backup';
     const targetDate = parts.join('-');
 
-    const assistant = assistants.find(a => a.name === assistantName);
-    if (!assistant) return;
-
     setSchedule(currentSchedule => {
       // Deep copy to avoid mutation issues
       const newSchedule = JSON.parse(JSON.stringify(currentSchedule));
@@ -58,13 +55,16 @@ function App() {
         return currentSchedule; // Should not happen
       }
       
-      // Remove from source
+      // Remove from source and keep the moved assistant with all its data
       const sourceList = sourceDay[sourceRole];
-      sourceList.splice(sourceIndex, 1);
-      
+      const [movedAssistant] = sourceList.splice(sourceIndex, 1);
+      if (!movedAssistant) {
+        return currentSchedule;
+      }
+
       // Add to target
       const targetList = targetDay[targetRole];
-      targetList.push(assistant);
+      targetList.push(movedAssistant);
       
       return newSchedule;
     });
